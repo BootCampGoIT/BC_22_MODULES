@@ -1,0 +1,4 @@
+.cartListItem {
+  display: flex;
+  align-items: center;
+}

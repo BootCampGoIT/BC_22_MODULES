@@ -46,6 +46,7 @@ export default {
     const target = this.refs[e.currentTarget.classList[0]].querySelector(`[data-navigationlink=${dataAttribute}]`);
     target.classList.add('activeLink');
     this.activeLinks[e.currentTarget.classList[0]] = target;
+    // console.log(this)
   }
 }
 

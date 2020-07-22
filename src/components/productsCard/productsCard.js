@@ -11,7 +11,9 @@ const createProductListMarkup = (products, favorites) => {
   return `
     <ul class="productList">
       ${products.reduce((acc, product) => {
-    acc += createProductListItemMarkup(product, favorites)
+    acc += `<li class="productListItem" data-id=${product.id}>
+       ${createProductListItemMarkup(product, favorites)}
+      </li>`
     return acc;
   }, '')}
     </ul>
@@ -20,7 +22,6 @@ const createProductListMarkup = (products, favorites) => {
 
 const createProductListItemMarkup = (product, favorites) => {
   return `
-  <li class="productListItem" data-id=${product.id}>
     <div class="favoriteBlock">
       <img src=${isFavorite(product.id, favorites) ? starFill : star} data-favorite="favorite" alt="star" class="favoriteStar" width="25" height="25"/>
     </div>
@@ -32,16 +33,17 @@ const createProductListItemMarkup = (product, favorites) => {
         <img src=${cartImage} alt="cart image" class="productListItemCartImage" width="50" height="50"/>
       </div>
     </div>
-  </li>
   `
 }
-
-
-
 
 export default {
   productsItems: [],
   destination: '',
+  userData: {},
+  keys: {
+    favorites: "myFavorites",
+    cart: 'myCart'
+  },
   productItem: {
     name: '',
     price: 0,
@@ -54,18 +56,37 @@ export default {
     available: true,
   },
 
-  async renderCards(destination, dataGetter, favorites = []) {
+
+  //   setData(data, ...rest) {
+  //     console.log(data);
+  //     const entries = Object.entries(data);
+  //     console.log(entries)
+  // },
+
+  settings(data, favorites, cart) { //["myFavorites", "myCart"]
+      this.userData = data;
+      this.keys.favorites = favorites;
+      this.keys.cart = cart;
+  },
+
+  async renderCards(destination, dataGetter) {
     this.destination = destination;
+    // this.favorites = [...favorites];
     if (dataGetter.constructor.name === "Array") {
       this.productsItems = [...dataGetter];
-      destination.innerHTML = createProductListMarkup(dataGetter, favorites);
+      destination.innerHTML = createProductListMarkup(dataGetter, this.userData[this.keys.favorites]);
       return dataGetter;
     }
 
     if (dataGetter.constructor.name === "Function") {
-      const data = await dataGetter();
-      this.productsItems = [...data];
-      destination.innerHTML = createProductListMarkup(data, favorites);
+      try {
+        const data = await dataGetter();
+        this.productsItems = [...data];
+        destination.innerHTML = createProductListMarkup(data, this.userData[this.keys.favorites]);
+      }
+      catch (error) {
+        throw new Error(error)
+      }
     }
     return this.productsItems
   },
@@ -88,54 +109,40 @@ export default {
       }
       return product
     })
-    this.destination.innerHTML = createProductListMarkup(this.productsItems);
+    // this.destination.innerHTML = createProductListMarkup(this.productsItems);
   },
 
-  setFavorite(e, favorites) {
+  setFavorite(e) {
     if (e.target.dataset.favorite) {
-      const id = e.target.closest('[data-id]').dataset.id;
-      if (favorites.some(favorite => favorite === id)) {
-        const result = favorites.filter(favorite => favorite !== id)
-        this.renderCards(this.destination, this.productsItems, result)
-        return result
-      } else {
-        const result = [...favorites, id]
-        this.renderCards(this.destination, this.productsItems, result)
-        return result
-      }
-    }
-  },
+      const element = e.target.closest('[data-id]');
+      const favoriteStar = element.querySelector('.favoriteStar')
+      const id = element.dataset.id;
+      // const product = this.productsItems.find(product => product.id === id);
 
+      if (this.userData[this.keys.favorites].some(favorite => favorite === id)) {
+        const result = this.userData[this.keys.favorites].filter(favorite => favorite !== id);
+        this.userData[this.keys.favorites] = [...result];
+        favoriteStar.src = star;
+        // element.innerHTML = createProductListItemMarkup(product, this.favorites)
+        // this.renderCards(this.destination, this.productsItems, result)
+        // return result
+      } else {
+        this.userData[this.keys.favorites] = [...this.userData[this.keys.favorites], id];
+        // favorites = [...result];
+        favoriteStar.src = starFill;
+        // element.innerHTML = createProductListItemMarkup(product, this.favorites)
+        // this.renderCards(this.destination, this.productsItems, result)
+        // return result
+      }
+    } else return
+  },
 
   addToCart(e) {
-
-
-
-
+    if (e.target.classList.contains('productListItemCartImage')) {
+      const element = e.target.closest('[data-id]');
+      const id = element.dataset.id;
+      const product = this.productsItems.find(product => product.id === id)
+      this.userData[this.keys.cart] = [product, ...this.userData[this.keys.cart]]
+    } else return
   },
-
-  // getProduct(id) {
-
-  // }
-
-
-
-
-
-
-
-
-
-  // renderOne(element, position = 'end') {
-  // destination.insertAdjacentHTML(((position === 'end') ? 'beforeend' : "afterbegin", createProductListItemMarkup(element)))
-
 }
-
-
-
-
-
-
-
-
-// };
