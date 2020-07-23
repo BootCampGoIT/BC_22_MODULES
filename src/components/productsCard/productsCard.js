@@ -25,7 +25,7 @@ const createProductListItemMarkup = (product, favorites) => {
     <div class="favoriteBlock">
       <img src=${isFavorite(product.id, favorites) ? starFill : star} data-favorite="favorite" alt="star" class="favoriteStar" width="25" height="25"/>
     </div>
-    <img src=${product.productImage} alt=${product.productName} class="productListItemImage" width="200" height="200"/>
+    <img src=${product.productImage} alt=${product.productName} class="productListItemImage" width="200" />
     <p class="productListItemName">${product.productName}</p>
     <div class="productListItemOrder">
       <p class="productListItemPrice">${product.productPrice} $</p>
@@ -64,9 +64,9 @@ export default {
   // },
 
   settings(data, favorites, cart) { //["myFavorites", "myCart"]
-      this.userData = data;
-      this.keys.favorites = favorites;
-      this.keys.cart = cart;
+    this.userData = data;
+    this.keys.favorites = favorites;
+    this.keys.cart = cart;
   },
 
   async renderCards(destination, dataGetter) {
@@ -141,8 +141,24 @@ export default {
     if (e.target.classList.contains('productListItemCartImage')) {
       const element = e.target.closest('[data-id]');
       const id = element.dataset.id;
-      const product = this.productsItems.find(product => product.id === id)
-      this.userData[this.keys.cart] = [product, ...this.userData[this.keys.cart]]
+      const product = this.productsItems.find(product => product.id === id);
+
+      const existProduct = this.userData[this.keys.cart].find(product => product.id === id);
+      if (existProduct) {
+        existProduct.quantity += 1;
+      }
+      else {
+        const modifiedProduct = {
+          id: product.id,
+          productPrice: product.productPrice,
+          productImage: product.productImage,
+          productName: product.productName,
+          quantity: 1
+        }
+        this.userData[this.keys.cart] = [modifiedProduct, ...this.userData[this.keys.cart]];
+      }
+      console.log(this.userData[this.keys.cart])
+
     } else return
   },
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const BASE_URL = 'https://bc22-72ac2.firebaseio.com'
+const BASE_URL = 'https://newproject-eb2de.firebaseio.com'
 
 
 const transformData = (response) => {
@@ -18,7 +18,7 @@ export default {
 
   async getProducts() {
     try {
-      const response = await axios.get(`${BASE_URL}/shop/products.json`);
+      const response = await axios.get(`${BASE_URL}/products/shop/products.json`);
       return transformData(response);
     } catch (error) {
       console.log(error);
