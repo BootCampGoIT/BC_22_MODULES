@@ -1,4 +1,4 @@
-.cartWrapper{
+.cartWrapper {
   border: 1px solid black;
   border-radius: 5px;
   display: flex;
@@ -9,18 +9,17 @@
   padding: 10px;
 }
 
-
 .cartListItem {
   display: flex;
   align-items: center;
 }
 
-.cartButtonsWrapper{
+.cartButtonsWrapper {
   display: flex;
   justify-content: center;
 }
 
 .cartTotal {
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
 }

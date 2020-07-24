@@ -37,12 +37,13 @@ const createProductListItemMarkup = (product, favorites) => {
 }
 
 export default {
-  productsItems: [],
+  // productsItems: [],
   destination: '',
   userData: {},
   keys: {
-    favorites: "myFavorites",
-    cart: 'myCart'
+    favorites: '',
+    cart: '',
+    products: ''
   },
   productItem: {
     name: '',
@@ -57,23 +58,19 @@ export default {
   },
 
 
-  //   setData(data, ...rest) {
-  //     console.log(data);
-  //     const entries = Object.entries(data);
-  //     console.log(entries)
-  // },
-
-  settings(data, favorites, cart) { //["myFavorites", "myCart"]
+  settings(data, products, favorites, cart) { //["myFavorites", "myCart"]
     this.userData = data;
     this.keys.favorites = favorites;
     this.keys.cart = cart;
+    this.keys.products = products
   },
 
   async renderCards(destination, dataGetter) {
     this.destination = destination;
-    // this.favorites = [...favorites];
     if (dataGetter.constructor.name === "Array") {
-      this.productsItems = [...dataGetter];
+
+        // this.userData[this.keys.products] = [...dataGetter];
+
       destination.innerHTML = createProductListMarkup(dataGetter, this.userData[this.keys.favorites]);
       return dataGetter;
     }
@@ -81,28 +78,31 @@ export default {
     if (dataGetter.constructor.name === "Function") {
       try {
         const data = await dataGetter();
-        this.productsItems = [...data];
+
+          this.userData[this.keys.products] = [...data];
+
         destination.innerHTML = createProductListMarkup(data, this.userData[this.keys.favorites]);
       }
       catch (error) {
         throw new Error(error)
       }
     }
-    return this.productsItems
+
+    return this.userData[this.keys.products]
   },
 
   addCard(product) {
-    this.productsItems = [...this.productsItems, product];
+    this.userData[this.keys.products] = [...this.userData[this.keys.products], product];
     this.destination.children[0].insertAdjacentHTML('afterbegin', createProductListItemMarkup(product))
   },
 
   deleteCard(id) {
-    this.productsItems = this.productsItems.filter(product => product.id !== id);
-    this.destination.innerHTML = createProductListMarkup(this.productsItems);
+    this.userData[this.keys.products] = this.userData[this.keys.products].filter(product => product.id !== id);
+    this.destination.innerHTML = createProductListMarkup(this.userData[this.keys.products]);
   },
 
   editCard(id, editedProduct) {
-    this.productsItems = this.productsItems.map(product => {
+    this.userData[this.keys.products] = this.userData[this.keys.products].map(product => {
       if (product.id === id) {
         product = { ...product, ...editedProduct }
         return product
@@ -141,7 +141,7 @@ export default {
     if (e.target.classList.contains('productListItemCartImage')) {
       const element = e.target.closest('[data-id]');
       const id = element.dataset.id;
-      const product = this.productsItems.find(product => product.id === id);
+      const product = this.userData[this.keys.products].find(product => product.id === id);
 
       const existProduct = this.userData[this.keys.cart].find(product => product.id === id);
       if (existProduct) {
@@ -157,8 +157,6 @@ export default {
         }
         this.userData[this.keys.cart] = [modifiedProduct, ...this.userData[this.keys.cart]];
       }
-      console.log(this.userData[this.keys.cart])
-
     } else return
   },
 }

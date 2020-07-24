@@ -16,8 +16,8 @@ export const createCartListMarkup = (products, getTotalPrice) => {
    <p class="cartTotal">Total: <span class="cartTotalPrice">${getTotalPrice(products)}</span></p>
 
     <div class="cartButtonsWrapper">
-      <button type="button" class="cartButtonBack button">Back to reality</button>
-      <button type="button" class="cartButtonConfirm button">Confirm order</button>
+      <button type="button" class="cartButtonBack button" data-button="backToProducts">Back to reality</button>
+      <button type="button" class="cartButtonConfirm button" data-button="confirmOrder">Confirm order</button>
     </div>
   </div>
   `
@@ -41,21 +41,28 @@ const createCartListItemMarkup = (product) => {
 
 
 export default {
-  cartItems: [],
+  userData: {},
+  keys: {
+    cart: '',
+    orders: ''
+  },
   destination: '',
   totalPrice: 0,
-  cartItem: {
-    id: '',
-    quantity: 0
+
+
+  settings(data, cartKey, orderKey) {
+    this.userData = data;
+    this.keys.cart = cartKey;
+    this.keys.orders = orderKey;
   },
 
   openCart(destination, products) {
     this.destination = destination;
-    this.cartItems = [...products.map(({ id, productPrice, productImage, productName, quantity }) => {
+    this.userData[this.keys.cart] = [...products.map(({ id, productPrice, productImage, productName, quantity }) => {
       return { productPrice, productImage, productName, quantity, id }
     })]
     this.getTotalPrice.bind(this);
-    this.destination.innerHTML = createCartListMarkup(this.cartItems, this.getTotalPrice);
+    this.destination.innerHTML = createCartListMarkup(this.userData[this.keys.cart], this.getTotalPrice);
     const cartList = document.querySelector('.cartList');
     cartList.addEventListener('click', this.getQuantity.bind(this))
     cartList.addEventListener('click', this.removeCartItem.bind(this))
@@ -64,13 +71,12 @@ export default {
   getQuantity(e) {
     const listItem = e.target.closest('[data-id]');
     const id = listItem.dataset.id;
-    const element = this.cartItems.find(product => product.id === id);
+    const element = this.userData[this.keys.cart].find(product => product.id === id);
     const buttonDecrement = listItem.querySelector('[data-button="decrement"]');
     const cartTotalPrice = this.destination.querySelector('.cartTotalPrice');
 
 
     if (e.target.dataset.button === "decrement") {
-
       if (element.quantity <= 1) {
         element.quantity = 1;
       } else element.quantity -= 1;
@@ -87,24 +93,21 @@ export default {
     }
     const inputNumber = listItem.querySelector('[data-input="inputNumber"]')
     inputNumber.value = element.quantity;
-    console.dir(cartTotalPrice)
-    cartTotalPrice.textContent = this.getTotalPrice(this.cartItems);
-
-
+    cartTotalPrice.textContent = this.getTotalPrice(this.userData[this.keys.cart]);
   },
 
   removeCartItem(e) {
-    console.log(e.target)
+
     if (e.target.dataset.button === 'delete') {
       const listItem = e.target.closest('[data-id]');
       const id = listItem.dataset.id;
-      this.cartItems = [...this.cartItems.filter(product => product.id !== id)];
-      this.destination.innerHTML = createCartListMarkup(this.cartItems, this.getTotalPrice);
+      this.userData[this.keys.cart] = [...this.userData[this.keys.cart].filter(product => product.id !== id)];
+      this.destination.innerHTML = createCartListMarkup(this.userData[this.keys.cart], this.getTotalPrice);
       const cartList = document.querySelector('.cartList');
       cartList.addEventListener('click', this.getQuantity.bind(this))
       cartList.addEventListener('click', this.removeCartItem.bind(this));
       const cartTotalPrice = this.destination.querySelector('.cartTotalPrice');
-      cartTotalPrice.textContent = this.getTotalPrice(this.cartItems);
+      cartTotalPrice.textContent = this.getTotalPrice(this.userData[this.keys.cart]);
     } else return
 
   },
@@ -114,8 +117,38 @@ export default {
       acc += product.productPrice * product.quantity
       return acc;
     }, 0);
-  return total
+    return total
   },
+
+  getOrder(e) {
+    if (e.target.dataset.button === "confirmOrder") {
+      if (this.userData[this.keys.cart].length !== 0) {
+        const order = {
+          orderID: '12h3f1hg2f312',
+          date: new Date(),
+          authorID: '23h4gj4y2j3yg23',
+          address: {
+            place: "Brovary",
+            street: "Hrushevskogo",
+            building: 25
+          },
+          telephone: '098-256-5236',
+          orderProducts: [...this.userData[this.keys.cart].map(item => {
+            return { id: item.id, quantity: item.quantity }
+          })]
+        }
+        this.userData[this.keys.orders] = [...this.userData[this.keys.orders], order];
+        this.userData[this.keys.cart] = [];
+
+        // dabl
+        this.getTotalPrice.bind(this);
+        this.destination.innerHTML = createCartListMarkup(this.userData[this.keys.cart], this.getTotalPrice);
+        const cartList = document.querySelector('.cartList');
+        cartList.addEventListener('click', this.getQuantity.bind(this))
+        cartList.addEventListener('click', this.removeCartItem.bind(this))
+      } else console.log("No products in cart")
+    } else return
+  }
 
 
 

@@ -17,7 +17,6 @@ const navigationListItemMarkup = (elements) => {
   }, '')
 }
 
-
 export default {
   refs: {},
   activeLinks: {},
@@ -46,7 +45,7 @@ export default {
     const target = this.refs[e.currentTarget.classList[0]].querySelector(`[data-navigationlink=${dataAttribute}]`);
     target.classList.add('activeLink');
     this.activeLinks[e.currentTarget.classList[0]] = target;
-    // console.log(this)
+
   }
 }
 
@@ -62,7 +61,7 @@ export default {
 
 // const getPage = (e) => {
 //   const link = navigation.getActiveLink(e)
-//   console.log(link)
+
 // }
 
 // 3. Get event

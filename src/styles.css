@@ -19,9 +19,14 @@ html {
   justify-content: space-between; */
 }
 
-
 /* ================================================== */
+
 .sidebarNavigation ul {
   display: flex;
   flex-direction: column;
+}
+
+.productsPageConteiner {
+  display: flex;
+  justify-content: space-between;
 }
